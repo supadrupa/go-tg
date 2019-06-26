@@ -1,5 +1,8 @@
 # tg
 
+[![GoDoc Widget]][GoDoc]
+[![Go Report Card Widget]][Go Report Card]
+
 🤖 Golang bindings for Telegram Bot API (WIP 🚧)
 
 
@@ -69,3 +72,9 @@
    - [ ] [sendGame](https://core.telegram.org/bots/api#sendgame)
    - [ ] [setGameScore](https://core.telegram.org/bots/api#setgamescore)
    - [ ] [getGameHighScore](https://core.telegram.org/bots/api#setgamescore)
+
+
+[GoDoc]: https://godoc.org/github.com/mr-linch/go-tg
+[GoDoc Widget]: https://godoc.org/github.com/mr-linch/go-tg?status.svg
+[Go Report Card]: https://goreportcard.com/report/github.com/mr-linch/go-tg
+[Go Report Card Widget]: https://goreportcard.com/badge/github.com/mr-linch/go-tg
