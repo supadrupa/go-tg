@@ -1,29 +1,23 @@
 package tg
 
 import (
-	"encoding/json"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestResponseParameters_UnmarshalJSON(t *testing.T) {
-	for _, tt := range []struct {
-		in  string
-		out ResponseParameters
-	}{
-		{`{}`, ResponseParameters{}},
-		{`{"migrate_to_chat_id": 12345}`, ResponseParameters{MigrateToChatID: 12345}},
-		{`{"retry_after": 60}`, ResponseParameters{RetryAfter: time.Minute}},
-		{`{"migrate_to_chat_id": 12345, "retry_after": 60}`, ResponseParameters{MigrateToChatID: 12345, RetryAfter: time.Minute}},
-	} {
-		tmp := ResponseParameters{}
+func TestResponseParameters_UnmarshalResult(t *testing.T) {
+	dst := struct {
+		Test bool `json:"test"`
+	}{}
 
-		err := json.Unmarshal([]byte(tt.in), &tmp)
+	response := Response{
+		Result: []byte(`{"test": true}`),
+	}
 
-		if assert.NoError(t, err) {
-			assert.Equal(t, tt.out, tmp)
-		}
+	err := response.UnmarshalResult(&dst)
+
+	if assert.NoError(t, err) {
+		assert.True(t, dst.Test)
 	}
 }

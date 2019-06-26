@@ -2,7 +2,6 @@ package tg
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // ResponseParameters contains information about why a request was unsuccessful.
@@ -12,23 +11,7 @@ type ResponseParameters struct {
 
 	// Optional. In case of exceeding flood control,
 	// the time left to wait before request can be repeated.
-	RetryAfter time.Duration
-}
-
-func (params *ResponseParameters) UnmarshalJSON(data []byte) error {
-	helper := struct {
-		MigrateToChatID int `json:"migrate_to_chat_id"`
-		RetryAfter      int `json:"retry_after"`
-	}{}
-
-	if err := json.Unmarshal(data, &helper); err != nil {
-		return err
-	}
-
-	params.MigrateToChatID = helper.MigrateToChatID
-	params.RetryAfter = time.Second * time.Duration(helper.RetryAfter)
-
-	return nil
+	RetryAfter int64
 }
 
 // Response represents Telegram Bot API response.

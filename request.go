@@ -152,6 +152,8 @@ type RequestPart interface {
 }
 
 // AddPart adds complex objects to request.
+//
+//  NOTE: maybe rename to Include?
 func (r *Request) AddPart(part RequestPart) *Request {
 	part.AddToRequest(r)
 	return r
