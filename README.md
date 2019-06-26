@@ -2,6 +2,7 @@
 
 [![GoDoc Widget]][GoDoc]
 [![Go Report Card Widget]][Go Report Card]
+[![Travis Widget]][Travis]
 
 🤖 Golang bindings for Telegram Bot API (WIP 🚧)
 
@@ -78,3 +79,5 @@
 [GoDoc Widget]: https://godoc.org/github.com/mr-linch/go-tg?status.svg
 [Go Report Card]: https://goreportcard.com/report/github.com/mr-linch/go-tg
 [Go Report Card Widget]: https://goreportcard.com/badge/github.com/mr-linch/go-tg
+[Travis]: https://travis-ci.org/mr-linch/go-tg
+[Travis Widget]: https://travis-ci.org/mr-linch/go-tg.svg?branch=master
