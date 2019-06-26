@@ -20,18 +20,18 @@ const (
 
 // Peer define generic interface
 type Peer interface {
-	AsPeer(k string, r *Request)
+	AddPeerToRequest(k string, r *Request)
 }
 
 // UserID represents unique user identifier.
 type UserID int
 
-func (id UserID) AsPeer(k string, r *Request) { r.AddInt(k, int(id)) }
+func (id UserID) AddPeerToRequest(k string, r *Request) { r.AddInt(k, int(id)) }
 
 // Username represents user/supergroup/channel username.
 type Username string
 
-func (un Username) AsPeer(k string, r *Request) { r.AddString(k, string("@"+un)) }
+func (un Username) AddPeerToRequest(k string, r *Request) { r.AddString(k, string("@"+un)) }
 
 // User represents Telegram user or bot.
 type User struct {
@@ -43,7 +43,7 @@ type User struct {
 	LanguageCode string   `json:"language_code,omitempty"`
 }
 
-func (user User) AsPeer(k string, r *Request) { user.ID.AsPeer(k, r) }
+func (user User) AddPeerToRequest(k string, r *Request) { user.ID.AddPeerToRequest(k, r) }
 
 // FileID represents unique file identifier.
 type FileID string
@@ -114,7 +114,7 @@ type ChatPhoto struct {
 // ChatID unique chat identifier.
 type ChatID int64
 
-func (id ChatID) AsPeer(k string, r *Request) { r.AddInt64(k, int64(id)) }
+func (id ChatID) AddPeerToRequest(k string, r *Request) { r.AddInt64(k, int64(id)) }
 
 type ChatType string
 

@@ -259,7 +259,7 @@ func (client *Client) KickChatMember(
 		NewRequest("kickChatMember").
 			AddChatID(peer).
 			AddInt("user_id", int(userID)).
-			Add(opts),
+			AddPart(opts),
 		nil,
 	)
 }
@@ -327,7 +327,7 @@ func (client *Client) RestrictChatMember(
 		NewRequest("restrictChatMember").
 			AddChatID(peer).
 			AddInt("user_id", int(userID)).
-			Add(opts),
+			AddPart(opts),
 		nil,
 	)
 }

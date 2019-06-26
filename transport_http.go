@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -37,14 +36,14 @@ func (enc *MultipartEncoder) AddString(k string, v string) error {
 	return enc.w.WriteField(k, v)
 }
 
-func (enc *MultipartEncoder) AddInputFile(k string, name string, body io.Reader) error {
-	writer, err := enc.w.CreateFormFile(k, name)
+func (enc *MultipartEncoder) AddFile(k string, file RequestFile) error {
+	writer, err := enc.w.CreateFormFile(k, file.Name)
 
 	if err != nil {
 		return errors.Wrapf(err, "create form file '%s'", k)
 	}
 
-	if _, err := io.Copy(writer, body); err != nil {
+	if _, err := io.Copy(writer, file.Body); err != nil {
 		return errors.Wrapf(err, "copy to form file '%s'", k)
 	}
 
@@ -88,7 +87,7 @@ func (w *URLEncodedEncoder) AddString(k string, v string) error {
 	return nil
 }
 
-func (w *URLEncodedEncoder) AddInputFile(k string, name string, body io.Reader) error {
+func (w *URLEncodedEncoder) AddFile(k string, file RequestFile) error {
 	return errors.New("URLEncodedEncoder does not support file uploading")
 }
 
@@ -132,7 +131,7 @@ func (t *HTTPTransport) newUrlencodedEncoder(w io.Writer) HTTPEncoder {
 }
 
 func (t *HTTPTransport) Execute(ctx context.Context, r *Request) (*Response, error) {
-	if r.HasInputFile() {
+	if r.HasFiles() {
 		return t.executeStreaming(
 			ctx,
 			t.newMultipartEncoder,
@@ -264,18 +263,13 @@ func (t *HTTPTransport) executeStreaming(
 	// upload
 	go func() {
 		defer func() {
-			log.Printf("[writer] close pipe writer")
 			if err := pw.Close(); err != nil {
-				log.Printf("[WARNING] pipe.Writer close error: %s", err)
 				errChan <- errors.Wrap(err, "close pipe writer")
 			}
 		}()
 
 		defer func() {
-			log.Printf("[writer] close pipe writer")
-
 			if err := encoder.Close(); err != nil {
-				log.Printf("[WARNING] multipart.Write close error: %s", err)
 				errChan <- errors.Wrap(err, "close multipart writer")
 			}
 		}()
