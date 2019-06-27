@@ -6,6 +6,7 @@ package tg
 import (
 	"context"
 	"io"
+	"net/http"
 	"sync"
 )
 
@@ -135,5 +136,73 @@ func (mock *TransportMock) ExecuteCalls() []struct {
 	lockTransportMockExecute.RLock()
 	calls = mock.calls.Execute
 	lockTransportMockExecute.RUnlock()
+	return calls
+}
+
+var (
+	lockHTTPDoerMockDo sync.RWMutex
+)
+
+// Ensure, that HTTPDoerMock does implement HTTPDoer.
+// If this is not the case, regenerate this file with moq.
+var _ HTTPDoer = &HTTPDoerMock{}
+
+// HTTPDoerMock is a mock implementation of HTTPDoer.
+//
+//     func TestSomethingThatUsesHTTPDoer(t *testing.T) {
+//
+//         // make and configure a mocked HTTPDoer
+//         mockedHTTPDoer := &HTTPDoerMock{
+//             DoFunc: func(r *http.Request) (*http.Response, error) {
+// 	               panic("mock out the Do method")
+//             },
+//         }
+//
+//         // use mockedHTTPDoer in code that requires HTTPDoer
+//         // and then make assertions.
+//
+//     }
+type HTTPDoerMock struct {
+	// DoFunc mocks the Do method.
+	DoFunc func(r *http.Request) (*http.Response, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Do holds details about calls to the Do method.
+		Do []struct {
+			// R is the r argument value.
+			R *http.Request
+		}
+	}
+}
+
+// Do calls DoFunc.
+func (mock *HTTPDoerMock) Do(r *http.Request) (*http.Response, error) {
+	if mock.DoFunc == nil {
+		panic("HTTPDoerMock.DoFunc: method is nil but HTTPDoer.Do was just called")
+	}
+	callInfo := struct {
+		R *http.Request
+	}{
+		R: r,
+	}
+	lockHTTPDoerMockDo.Lock()
+	mock.calls.Do = append(mock.calls.Do, callInfo)
+	lockHTTPDoerMockDo.Unlock()
+	return mock.DoFunc(r)
+}
+
+// DoCalls gets all the calls that were made to Do.
+// Check the length with:
+//     len(mockedHTTPDoer.DoCalls())
+func (mock *HTTPDoerMock) DoCalls() []struct {
+	R *http.Request
+} {
+	var calls []struct {
+		R *http.Request
+	}
+	lockHTTPDoerMockDo.RLock()
+	calls = mock.calls.Do
+	lockHTTPDoerMockDo.RUnlock()
 	return calls
 }
