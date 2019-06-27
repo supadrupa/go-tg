@@ -2,7 +2,6 @@ language: go
 
 go:
   - 1.12.x
-  - tip
 
 sudo: false
 
@@ -12,7 +11,7 @@ git:
 
 
 script:
-  - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - go test -v -race -coverprofile=coverage.txt -covermode=atomic
+  - bash <(curl -s https://codecov.io/bash) -c -F unittests
+  - go test -v -race -coverprofile=coverage.txt -covermode=atomic -tags=integration -run=Integration
+  - bash <(curl -s https://codecov.io/bash) -c -F integration
