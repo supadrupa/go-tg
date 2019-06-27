@@ -179,7 +179,7 @@ func (client *Client) GetChat(
 	return
 }
 
-// Use this method to change the title of a chat.
+// SetChatTitle use this method to change the title of a chat.
 // Titles can't be changed for private chats.
 // The bot must be an administrator in the chat for this to work and
 // must have the appropriate admin rights.
@@ -200,7 +200,7 @@ func (client *Client) SetChatTitle(
 	)
 }
 
-// Use this method to change the description of a supergroup or a channel.
+// SetChatDescription use this method to change the description of a supergroup or a channel.
 // The bot must be an administrator in the chat for this to work and
 // must have the appropriate admin rights.
 //
@@ -235,7 +235,7 @@ func (client *Client) GetChatMembersCount(
 	return
 }
 
-// Use this method to get a list of administrators in a chat.
+// GetChatAdministrators use this method to get a list of administrators in a chat.
 // On success, returns an Array of ChatMember objects that contains information
 // about all chat administrators except other bots.
 // If the chat is a group or a supergroup and no administrators were appointed,
