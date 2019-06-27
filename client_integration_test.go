@@ -159,7 +159,7 @@ func TestClient_SetChatDescription(t *testing.T) {
 	err := integrationClient.SetChatDescription(
 		context.Background(),
 		config.ExampleChannelID,
-		fmt.Sprintf("this channel is used for integration tests of github.com/mr-linch/go-tg\n\n last run: [%s]", time.Now().Format(time.RFC822)),
+		fmt.Sprintf("this channel is used for integration tests of github.com/mr-linch/go-tg\n\n last run: [%d]", time.Now().Unix()),
 	)
 
 	assert.NoError(t, err)
