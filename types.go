@@ -86,19 +86,22 @@ type UserProfilePhotos struct {
 	Items []PhotoSizeSlice `json:"photos"`
 }
 
-// At returns photo at position.
-func (photos UserProfilePhotos) At(i int) PhotoSizeSlice {
-	return photos.Items[i]
-}
-
-// First returns first photo.
+// First returns first photo or nil if no items.
 func (photos UserProfilePhotos) First() PhotoSizeSlice {
-	return photos.Items[0]
+	if len(photos.Items) > 0 {
+		return photos.Items[0]
+	}
+
+	return nil
 }
 
-// Last returns last photo.
+// Last returns last photo or nil if no items.
 func (photos UserProfilePhotos) Last() PhotoSizeSlice {
-	return photos.Items[len(photos.Items)-1]
+	if len(photos.Items) > 0 {
+		return photos.Items[len(photos.Items)-1]
+	}
+
+	return nil
 }
 
 type ChatPhoto struct {
@@ -173,9 +176,9 @@ type Chat struct {
 	// Optional. True, if the bot can change the group sticker set.
 	// Returned only in getChat.
 	CanSetStickerSet bool `json:"can_set_sticker_set,omitempty"`
-
-	client *Client
 }
+
+func (chat Chat) AddPeerToRequest(k string, r *Request) { chat.ID.AddPeerToRequest(k, r) }
 
 type ChatMember struct {
 	// Information about the user
