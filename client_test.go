@@ -236,3 +236,25 @@ func TestClient_RestrictChatMember(t *testing.T) {
 		"can_send_web_page_previews": "true",
 	}, args)
 }
+
+func TestClient_Send(t *testing.T) {
+	t.Run("BuildFailed", func(t *testing.T) {
+		ctx := context.Background()
+		transport := &TransportMock{}
+
+		client := NewClient("1234:secret",
+			WithTransport(transport),
+		)
+
+		testErr := errors.New("test")
+
+		msg := &OutgoingMessageMock{
+			BuildSendRequestFunc: func() (*Request, error) {
+				return nil, testErr
+			},
+		}
+
+		err := client.Send(ctx, msg, nil)
+		assert.Equal(t, testErr, err)
+	})
+}

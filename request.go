@@ -70,6 +70,15 @@ func (r *Request) AddString(k string, v string) *Request {
 	return r
 }
 
+// AddOptString adds string argument k to request, v is not empty string.
+func (r *Request) AddOptString(k string, v string) *Request {
+	if v != "" {
+		return r.AddString(k, v)
+	}
+
+	return r
+}
+
 // AddInt adds int argument k to request.
 func (r *Request) AddInt(k string, v int) *Request {
 	return r.AddString(k, strconv.Itoa(v))

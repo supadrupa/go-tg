@@ -18,6 +18,19 @@ const (
 	HTML
 )
 
+// String returns string representation of parse mode.
+// If not set returns empty string.
+func (pm ParseMode) String() string {
+	switch pm {
+	case Markdown:
+		return "markdown"
+	case HTML:
+		return "HTML"
+	default:
+		return ""
+	}
+}
+
 // Peer define generic interface
 type Peer interface {
 	AddPeerToRequest(k string, r *Request)

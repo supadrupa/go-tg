@@ -2,11 +2,75 @@ package tg
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestReplyMarkup(t *testing.T) {
+	for _, tt := range []struct {
+		Input  ReplyMarkup
+		Output string
+	}{
+		{
+			NewInlineKeyboardMarkup(
+				NewInlineKeyboardRow(
+					NewInlineKeyboardButtonPay("test"),
+				),
+			),
+			`{
+				"inline_keyboard":[[
+					{
+						"text": "test",
+						"pay": true
+					}
+				]]
+			}`,
+		},
+		{
+			NewReplyKeyboardMarkup(
+				NewKeyboardRow(
+					NewKeyboardButtonLocation("test"),
+				),
+			).WithResize(true).WithSelective(true).WithOneTime(true),
+			`{
+				"keyboard": [
+					[
+						{
+							"text": "test",
+							"request_location": true
+						}
+					]
+				],
+				"resize_keyboard": true,
+				"one_time_keyboard": true,
+				"selective": true
+			}`,
+		},
+		{
+			NewForceReply().WithSelective(true),
+			`{
+				"force_reply": true,
+				"selective": true
+			}`,
+		},
+		{
+			NewReplyKeyboardRemove().WithSelective(true),
+			`{
+				"remove_keyboard": true,
+				"selective": true
+			}`,
+		},
+	} {
+		result, err := tt.Input.EncodeReplyMarkup()
+		fmt.Println(result)
+		if assert.NoError(t, err) {
+			assert.JSONEq(t, tt.Output, result)
+		}
+	}
+}
 
 func TestLoginURL_New(t *testing.T) {
 

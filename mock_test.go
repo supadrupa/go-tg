@@ -206,3 +206,125 @@ func (mock *HTTPDoerMock) DoCalls() []struct {
 	lockHTTPDoerMockDo.RUnlock()
 	return calls
 }
+
+var (
+	lockReplyMarkupMockEncodeReplyMarkup sync.RWMutex
+)
+
+// Ensure, that ReplyMarkupMock does implement ReplyMarkup.
+// If this is not the case, regenerate this file with moq.
+var _ ReplyMarkup = &ReplyMarkupMock{}
+
+// ReplyMarkupMock is a mock implementation of ReplyMarkup.
+//
+//     func TestSomethingThatUsesReplyMarkup(t *testing.T) {
+//
+//         // make and configure a mocked ReplyMarkup
+//         mockedReplyMarkup := &ReplyMarkupMock{
+//             EncodeReplyMarkupFunc: func() (string, error) {
+// 	               panic("mock out the EncodeReplyMarkup method")
+//             },
+//         }
+//
+//         // use mockedReplyMarkup in code that requires ReplyMarkup
+//         // and then make assertions.
+//
+//     }
+type ReplyMarkupMock struct {
+	// EncodeReplyMarkupFunc mocks the EncodeReplyMarkup method.
+	EncodeReplyMarkupFunc func() (string, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// EncodeReplyMarkup holds details about calls to the EncodeReplyMarkup method.
+		EncodeReplyMarkup []struct {
+		}
+	}
+}
+
+// EncodeReplyMarkup calls EncodeReplyMarkupFunc.
+func (mock *ReplyMarkupMock) EncodeReplyMarkup() (string, error) {
+	if mock.EncodeReplyMarkupFunc == nil {
+		panic("ReplyMarkupMock.EncodeReplyMarkupFunc: method is nil but ReplyMarkup.EncodeReplyMarkup was just called")
+	}
+	callInfo := struct {
+	}{}
+	lockReplyMarkupMockEncodeReplyMarkup.Lock()
+	mock.calls.EncodeReplyMarkup = append(mock.calls.EncodeReplyMarkup, callInfo)
+	lockReplyMarkupMockEncodeReplyMarkup.Unlock()
+	return mock.EncodeReplyMarkupFunc()
+}
+
+// EncodeReplyMarkupCalls gets all the calls that were made to EncodeReplyMarkup.
+// Check the length with:
+//     len(mockedReplyMarkup.EncodeReplyMarkupCalls())
+func (mock *ReplyMarkupMock) EncodeReplyMarkupCalls() []struct {
+} {
+	var calls []struct {
+	}
+	lockReplyMarkupMockEncodeReplyMarkup.RLock()
+	calls = mock.calls.EncodeReplyMarkup
+	lockReplyMarkupMockEncodeReplyMarkup.RUnlock()
+	return calls
+}
+
+var (
+	lockOutgoingMessageMockBuildSendRequest sync.RWMutex
+)
+
+// Ensure, that OutgoingMessageMock does implement OutgoingMessage.
+// If this is not the case, regenerate this file with moq.
+var _ OutgoingMessage = &OutgoingMessageMock{}
+
+// OutgoingMessageMock is a mock implementation of OutgoingMessage.
+//
+//     func TestSomethingThatUsesOutgoingMessage(t *testing.T) {
+//
+//         // make and configure a mocked OutgoingMessage
+//         mockedOutgoingMessage := &OutgoingMessageMock{
+//             BuildSendRequestFunc: func() (*Request, error) {
+// 	               panic("mock out the BuildSendRequest method")
+//             },
+//         }
+//
+//         // use mockedOutgoingMessage in code that requires OutgoingMessage
+//         // and then make assertions.
+//
+//     }
+type OutgoingMessageMock struct {
+	// BuildSendRequestFunc mocks the BuildSendRequest method.
+	BuildSendRequestFunc func() (*Request, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// BuildSendRequest holds details about calls to the BuildSendRequest method.
+		BuildSendRequest []struct {
+		}
+	}
+}
+
+// BuildSendRequest calls BuildSendRequestFunc.
+func (mock *OutgoingMessageMock) BuildSendRequest() (*Request, error) {
+	if mock.BuildSendRequestFunc == nil {
+		panic("OutgoingMessageMock.BuildSendRequestFunc: method is nil but OutgoingMessage.BuildSendRequest was just called")
+	}
+	callInfo := struct {
+	}{}
+	lockOutgoingMessageMockBuildSendRequest.Lock()
+	mock.calls.BuildSendRequest = append(mock.calls.BuildSendRequest, callInfo)
+	lockOutgoingMessageMockBuildSendRequest.Unlock()
+	return mock.BuildSendRequestFunc()
+}
+
+// BuildSendRequestCalls gets all the calls that were made to BuildSendRequest.
+// Check the length with:
+//     len(mockedOutgoingMessage.BuildSendRequestCalls())
+func (mock *OutgoingMessageMock) BuildSendRequestCalls() []struct {
+} {
+	var calls []struct {
+	}
+	lockOutgoingMessageMockBuildSendRequest.RLock()
+	calls = mock.calls.BuildSendRequest
+	lockOutgoingMessageMockBuildSendRequest.RUnlock()
+	return calls
+}

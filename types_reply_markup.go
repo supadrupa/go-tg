@@ -4,6 +4,17 @@ import (
 	"encoding/json"
 )
 
+// ReplyMarkup define generic interface for all reply markups.
+//
+// Types implementing this interface:
+//  - InlineKeyboardMarkup
+//  - KeyboardReplyMarkup
+//  - ForceReply
+//  - ReplyKeyboardRemove
+type ReplyMarkup interface {
+	EncodeReplyMarkup() (string, error)
+}
+
 // LoginURL represents a parameter of the inline keyboard button used to automatically authorize a user.
 // Serves as a great replacement for the Telegram Login Widget when the user is coming from Telegram. All the user needs to do is tap/click a button and confirm that they want to log in.
 //
@@ -161,6 +172,12 @@ func NewInlineKeyboardMarkup(rows ...InlineKeyboardRow) InlineKeyboardMarkup {
 	}
 }
 
+// EncodeReplyMarkup returns encoded (JSON) representation of InlineKeyboardMarkup.
+func (ikb InlineKeyboardMarkup) EncodeReplyMarkup() (string, error) {
+	obj, err := json.Marshal(ikb)
+	return string(obj), err
+}
+
 // KeyboardButton represents one button of the reply keyboard.
 // Optional fields are mutually exclusive.
 type KeyboardButton struct {
@@ -256,6 +273,12 @@ func (kb ReplyKeyboardMarkup) WithSelective(yes bool) ReplyKeyboardMarkup {
 	return kb
 }
 
+// EncodeReplyMarkup returns encoded (JSON) representation of InlineKeyboardMarkup.
+func (kb ReplyKeyboardMarkup) EncodeReplyMarkup() (string, error) {
+	obj, err := json.Marshal(kb)
+	return string(obj), err
+}
+
 // Upon receiving a message with this object, T
 // Telegram clients will display a reply interface to the user
 // Act as if the user has selected the bot‘s message and tapped ’Reply'.
@@ -287,6 +310,12 @@ func (fr ForceReply) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// EncodeReplyMarkup returns encoded (JSON) representation of InlineKeyboardMarkup.
+func (fr ForceReply) EncodeReplyMarkup() (string, error) {
+	obj, err := json.Marshal(fr)
+	return string(obj), err
+}
+
 // ReplyKeyboardRemove upon receiving a message with this object,
 // Telegram clients will remove the current custom keyboard
 // and display the default letter-keyboard.
@@ -300,17 +329,23 @@ func NewReplyKeyboardRemove() ReplyKeyboardRemove {
 }
 
 // WithSelective makes keyboard remove selective.
-func (fr ReplyKeyboardRemove) WithSelective(yes bool) ReplyKeyboardRemove {
-	fr.Selective = yes
-	return fr
+func (kr ReplyKeyboardRemove) WithSelective(yes bool) ReplyKeyboardRemove {
+	kr.Selective = yes
+	return kr
 }
 
-func (fr ReplyKeyboardRemove) MarshalJSON() ([]byte, error) {
+// EncodeReplyMarkup returns encoded (JSON) representation of InlineKeyboardMarkup.
+func (kr ReplyKeyboardRemove) EncodeReplyMarkup() (string, error) {
+	obj, err := json.Marshal(kr)
+	return string(obj), err
+}
+
+func (kr ReplyKeyboardRemove) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		RemoveKeyboard bool `json:"remove_keyboard"`
 		Selective      bool `json:"selective"`
 	}{
 		RemoveKeyboard: true,
-		Selective:      fr.Selective,
+		Selective:      kr.Selective,
 	})
 }

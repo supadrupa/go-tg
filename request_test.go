@@ -120,6 +120,20 @@ func TestRequest_Add(t *testing.T) {
 		)
 	})
 
+	t.Run("OptString", func(t *testing.T) {
+		assertRequestArgEqual(t,
+			NewRequest("test").AddOptString("v", "123"),
+			"v",
+			"123",
+		)
+
+		assertRequestArgEqual(t,
+			NewRequest("test").AddOptString("v", ""),
+			"v",
+			"",
+		)
+	})
+
 	t.Run("Int", func(t *testing.T) {
 		assertRequestArgEqual(t,
 			NewRequest("test").AddInt("v", -1003413),

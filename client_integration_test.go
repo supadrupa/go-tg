@@ -145,7 +145,7 @@ func TestClient_GetChat_Integration(t *testing.T) {
 	})
 }
 
-func TestClient_SetChatTitle(t *testing.T) {
+func TestClient_SetChatTitle_Integration(t *testing.T) {
 	err := integrationClient.SetChatTitle(
 		context.Background(),
 		config.ExampleChannelID,
@@ -155,7 +155,7 @@ func TestClient_SetChatTitle(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestClient_SetChatDescription(t *testing.T) {
+func TestClient_SetChatDescription_Integration(t *testing.T) {
 	err := integrationClient.SetChatDescription(
 		context.Background(),
 		config.ExampleChannelID,
@@ -165,7 +165,7 @@ func TestClient_SetChatDescription(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestClient_GetChatMembersCount(t *testing.T) {
+func TestClient_GetChatMembersCount_Integration(t *testing.T) {
 	count, err := integrationClient.GetChatMembersCount(
 		context.Background(),
 		config.ExampleChannelID,
@@ -175,7 +175,7 @@ func TestClient_GetChatMembersCount(t *testing.T) {
 	assert.NotZero(t, count)
 }
 
-func TestClient_GetChatAdministrators(t *testing.T) {
+func TestClient_GetChatAdministrators_Integration(t *testing.T) {
 	admins, err := integrationClient.GetChatAdministrators(
 		context.Background(),
 		config.ExampleChannelID,
@@ -184,4 +184,24 @@ func TestClient_GetChatAdministrators(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, admins)
 
+}
+
+func TestClient_Send_TextMessage_Integration(t *testing.T) {
+	msg := NewTextMessage(config.ExampleChannelID, "*Text*: `TestClient_Send_TextMessage_Integration`").
+		WithParseMode(Markdown).
+		WithNotification(false).
+		WithWebPagePreview(false).
+		WithReplyMarkup(
+			NewInlineKeyboardMarkup(
+				NewInlineKeyboardRow(
+					NewInlineKeyboardButtonURL(
+						"Sources",
+						"github.com/mr-linch/go-tg",
+					),
+				),
+			),
+		)
+
+	err := integrationClient.Send(context.Background(), msg, nil)
+	assert.NoError(t, err)
 }

@@ -356,3 +356,19 @@ func (client *Client) RestrictChatMember(
 		nil,
 	)
 }
+
+type OutgoingMessage interface {
+	BuildSendRequest() (*Request, error)
+}
+
+func (client *Client) Send(ctx context.Context, msg OutgoingMessage, dst interface{}) error {
+	req, err := msg.BuildSendRequest()
+	if err != nil {
+		return err
+	}
+
+	return client.Invoke(ctx,
+		req,
+		&dst,
+	)
+}

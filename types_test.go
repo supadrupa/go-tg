@@ -9,6 +9,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseMode_String(t *testing.T) {
+	for k, v := range map[ParseMode]string{
+		Plain:    "",
+		Markdown: "markdown",
+		HTML:     "HTML",
+	} {
+		assert.Equal(t,
+			v,
+			k.String(),
+		)
+	}
+}
+
 func TestPeers(t *testing.T) {
 	for _, tt := range []struct {
 		Peer  Peer
