@@ -2,6 +2,7 @@ package tg
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -141,6 +142,78 @@ func TestPhotoMessage(t *testing.T) {
 
 			assert.Equal(t, map[string]InputFile{
 				"photo": inputFile,
+			}, files)
+		}
+	})
+}
+
+func TestAudioMessage(t *testing.T) {
+	inputFile := NewInputFileBytes("audio.mp3", []byte("no data"))
+	thumbFile := NewInputFileBytes("thumb.png", []byte("no thumb data"))
+
+	t.Run("NewAndWith", func(t *testing.T) {
+		assert.Equal(t,
+			&AudioMessage{
+				Peer:                UserID(1),
+				Audio:               inputFile,
+				Duration:            time.Minute,
+				Title:               "test title",
+				Performer:           "test performer",
+				Thumb:               &thumbFile,
+				Caption:             "test",
+				ParseMode:           Markdown,
+				DisableNotification: true,
+				ReplyTo:             MessageID(1),
+				ReplyMarkup:         NewForceReply(),
+			},
+			NewAudioMessage(UserID(1), inputFile).
+				WithCaption("test").
+				WithDuration(time.Minute).
+				WithPerformer("test performer").
+				WithTitle("test title").
+				WithThumb(thumbFile).
+				WithParseMode(Markdown).
+				WithNotification(false).
+				WithReplyTo(MessageID(1)).
+				WithReplyMarkup(NewForceReply()),
+		)
+	})
+
+	t.Run("BuildSendRequest", func(t *testing.T) {
+		msg := NewAudioMessage(UserID(1), inputFile).
+			WithCaption("test").
+			WithDuration(time.Minute).
+			WithPerformer("test performer").
+			WithTitle("test title").
+			WithThumb(thumbFile).
+			WithParseMode(Markdown).
+			WithNotification(false).
+			WithReplyTo(MessageID(1)).
+			WithReplyMarkup(NewForceReply())
+
+		r, err := msg.BuildSendRequest()
+
+		if assert.NoError(t, err) {
+			args := extractArgs(r)
+
+			assert.Equal(t, map[string]string{
+				"chat_id":              "1",
+				"caption":              "test",
+				"title":                "test title",
+				"performer":            "test performer",
+				"duration":             "60",
+				"parse_mode":           "markdown",
+				"disable_notification": "true",
+				"reply_markup":         `{"force_reply":true,"selective":false}`,
+				"reply_to_message_id":  "1",
+				"thumb":                "attach://__0__",
+			}, args)
+
+			files := extractFiles(r)
+
+			assert.Equal(t, map[string]InputFile{
+				"audio": inputFile,
+				"__0__": thumbFile,
 			}, files)
 		}
 	})

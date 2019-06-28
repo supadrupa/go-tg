@@ -248,3 +248,42 @@ func TestClient_Send_PhotoMessage_Integration(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+func TestClient_Send_AudioMessage_Integration(t *testing.T) {
+	// open audio file
+	audioFile, err := NewInputFileLocal("testdata/audio.mp3")
+	require.NoError(t, err, "no test data!")
+	defer audioFile.Close()
+
+	// open thumb file
+	thumbFile, err := NewInputFileLocal("testdata/gopher.jpg")
+	require.NoError(t, err, "no test data!")
+	defer thumbFile.Close()
+
+	msg := NewAudioMessage(config.ExampleChannelID, audioFile).
+		WithCaption("*Text*: `TestClient_Send_PhotoMessage_Integration`").
+		WithTitle("go-tg").
+		WithPerformer("mr-linch").
+		WithThumb(thumbFile).
+		WithDuration(time.Second * 80).
+		WithParseMode(Markdown).
+		WithNotification(false).
+		WithReplyMarkup(
+			NewInlineKeyboardMarkup(
+				NewInlineKeyboardRow(
+					NewInlineKeyboardButtonURL(
+						"Sources",
+						"github.com/mr-linch/go-tg",
+					),
+				),
+			),
+		)
+
+	err = integrationClient.Send(
+		context.Background(),
+		msg,
+		nil,
+	)
+
+	assert.NoError(t, err)
+}

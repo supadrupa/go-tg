@@ -1,5 +1,7 @@
 package tg
 
+import "time"
+
 // Media define interface files in outgoing message.
 //
 // Types implementing this interface:
@@ -210,6 +212,127 @@ func (msg *PhotoMessage) BuildSendRequest() (*Request, error) {
 		AddOptBool("disable_notification", msg.DisableNotification)
 
 	addMediaToRequest(r, "photo", msg.Photo)
+	addOptMessageIdentityToRequest(r, "reply_to_message_id", msg.ReplyTo)
+
+	return addOptReplyMarkupToRequest(r, "reply_markup", msg.ReplyMarkup)
+}
+
+// AudioMessage represents outgoing audio message.
+// Audio must be in the .mp3 format.
+// Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
+type AudioMessage struct {
+	// Recipient of photo message.
+	Peer Peer
+
+	// Audio media to send (InputFile, FileID, RemoteFile).
+	Audio Media
+
+	// Caption of audio (0-1024).
+	Caption string
+
+	// Parse mode of caption.
+	ParseMode ParseMode
+
+	// Duration of the audio (will be sent in seconds).
+	Duration time.Duration
+
+	// Performer of the track.
+	Performer string
+
+	// Track name
+	Title string
+
+	// Thumbnail of the file sent.
+	// Can be ignored if thumbnail generation for the file is supported server-side.
+	// The thumbnail should be in JPEG format and less than 200 kB in size.
+	// A thumbnail‘s width and height should not exceed 320.
+	// Thumbnails can’t be reused and can be only uploaded as a new file.
+	Thumb *InputFile
+
+	// Pass true for send message silent.
+	DisableNotification bool
+
+	// Reply to message identity.
+	ReplyTo MessageIdentity
+
+	// Reply markup of the message.
+	ReplyMarkup ReplyMarkup
+}
+
+// NewAudioMessage creates outgoing audio message.
+func NewAudioMessage(to Peer, audio Media) *AudioMessage {
+	return &AudioMessage{
+		Peer:  to,
+		Audio: audio,
+	}
+}
+
+// WithCaption sets message caption.
+func (msg *AudioMessage) WithCaption(text string) *AudioMessage {
+	msg.Caption = text
+	return msg
+}
+
+// WithTitle sets audio title.
+func (msg *AudioMessage) WithTitle(title string) *AudioMessage {
+	msg.Title = title
+	return msg
+}
+
+// WithPerformer sets audio performer.
+func (msg *AudioMessage) WithPerformer(performer string) *AudioMessage {
+	msg.Performer = performer
+	return msg
+}
+
+// WithDuration sets audio duration.
+func (msg *AudioMessage) WithDuration(d time.Duration) *AudioMessage {
+	msg.Duration = d
+	return msg
+}
+
+// WithThumb sets audio thumb.
+func (msg *AudioMessage) WithThumb(thumb InputFile) *AudioMessage {
+	msg.Thumb = &thumb
+	return msg
+}
+
+// WithParseMode sets caption parse mode.
+func (msg *AudioMessage) WithParseMode(pm ParseMode) *AudioMessage {
+	msg.ParseMode = pm
+	return msg
+}
+
+// WithNotification enable or disable notification (default: enabled).
+func (msg *AudioMessage) WithNotification(yes bool) *AudioMessage {
+	msg.DisableNotification = !yes
+	return msg
+}
+
+// WithReplyTo sets ids of original message, if message is reply.
+func (msg *AudioMessage) WithReplyTo(msgID MessageIdentity) *AudioMessage {
+	msg.ReplyTo = msgID
+	return msg
+}
+
+// WithReplyMarkup sets message reply markup.
+func (msg *AudioMessage) WithReplyMarkup(rm ReplyMarkup) *AudioMessage {
+	msg.ReplyMarkup = rm
+	return msg
+}
+
+func (msg *AudioMessage) BuildSendRequest() (*Request, error) {
+	r := NewRequest("sendAudio").
+		AddChatID(msg.Peer).
+		AddOptString("caption", msg.Caption).
+		AddOptString("parse_mode", msg.ParseMode.String()).
+		AddOptString("performer", msg.Performer).
+		AddOptString("title", msg.Title).
+		AddOptBool("disable_notification", msg.DisableNotification).
+		AddOptInt("duration", int(msg.Duration.Seconds())).
+		AddOptAttachment("thumb", msg.Thumb)
+
+	addMediaToRequest(r, "audio", msg.Audio)
 	addOptMessageIdentityToRequest(r, "reply_to_message_id", msg.ReplyTo)
 
 	return addOptReplyMarkupToRequest(r, "reply_markup", msg.ReplyMarkup)

@@ -1,6 +1,7 @@
 package tg
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -25,8 +26,9 @@ type Request struct {
 	token  string
 	method string
 
-	args  map[string]string
-	files map[string]InputFile
+	args          map[string]string
+	files         map[string]InputFile
+	attachmentIdx int
 }
 
 // NewRequest creates request with provided method.
@@ -141,6 +143,20 @@ func (r *Request) AddTime(k string, v time.Time) *Request {
 func (r *Request) AddOptTime(k string, v time.Time) *Request {
 	if !v.IsZero() {
 		r.AddTime(k, v)
+	}
+
+	return r
+}
+
+// AddOptAttachment adds attachment to the request
+func (r *Request) AddOptAttachment(k string, attachment *InputFile) *Request {
+	if attachment != nil {
+		key := fmt.Sprintf("__%d__", r.attachmentIdx)
+
+		r.AddString(k, "attach://"+key)
+		r.AddFile(key, *attachment)
+
+		r.attachmentIdx++
 	}
 
 	return r
