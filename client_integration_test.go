@@ -218,3 +218,33 @@ func TestClient_Send_TextMessage_Integration(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestClient_Send_PhotoMessage_Integration(t *testing.T) {
+
+	photo, err := NewInputFileLocal("testdata/go-work.png")
+	require.NoError(t, err, "no test data!")
+	defer photo.Close()
+
+	msg := NewPhotoMessage(config.ExampleChannelID, photo).
+		WithCaption("*Text*: `TestClient_Send_PhotoMessage_Integration`").
+		WithParseMode(Markdown).
+		WithNotification(false).
+		WithReplyMarkup(
+			NewInlineKeyboardMarkup(
+				NewInlineKeyboardRow(
+					NewInlineKeyboardButtonURL(
+						"Sources",
+						"github.com/mr-linch/go-tg",
+					),
+				),
+			),
+		)
+
+	err = integrationClient.Send(
+		context.Background(),
+		msg,
+		nil,
+	)
+
+	assert.NoError(t, err)
+}

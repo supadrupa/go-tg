@@ -61,6 +61,10 @@ func (user User) AddPeerToRequest(k string, r *Request) { user.ID.AddPeerToReque
 // FileID represents unique file identifier.
 type FileID string
 
+func (id FileID) AddFileToRequest(k string, r *Request) {
+	r.AddString(k, string(id))
+}
+
 // File represents a file ready to be downloaded.
 type File struct {
 	ID   FileID `json:"file_id"`

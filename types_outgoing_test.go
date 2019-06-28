@@ -91,3 +91,57 @@ func TestForwardMessage(t *testing.T) {
 		}
 	})
 }
+
+func TestPhotoMessage(t *testing.T) {
+	inputFile := NewInputFileBytes("test.png", []byte("no data"))
+
+	t.Run("NewAndWith", func(t *testing.T) {
+		assert.Equal(t,
+			&PhotoMessage{
+				Peer:                UserID(1),
+				Photo:               inputFile,
+				Caption:             "test",
+				ParseMode:           Markdown,
+				DisableNotification: true,
+				ReplyTo:             MessageID(1),
+				ReplyMarkup:         NewForceReply(),
+			},
+			NewPhotoMessage(UserID(1), inputFile).
+				WithCaption("test").
+				WithParseMode(Markdown).
+				WithNotification(false).
+				WithReplyTo(MessageID(1)).
+				WithReplyMarkup(NewForceReply()),
+		)
+	})
+
+	t.Run("BuildSendRequest", func(t *testing.T) {
+		msg := NewPhotoMessage(UserID(1), inputFile).
+			WithCaption("test").
+			WithParseMode(Markdown).
+			WithNotification(false).
+			WithReplyTo(MessageID(1)).
+			WithReplyMarkup(NewForceReply())
+
+		r, err := msg.BuildSendRequest()
+
+		if assert.NoError(t, err) {
+			args := extractArgs(r)
+
+			assert.Equal(t, map[string]string{
+				"chat_id":              "1",
+				"caption":              "test",
+				"parse_mode":           "markdown",
+				"disable_notification": "true",
+				"reply_markup":         `{"force_reply":true,"selective":false}`,
+				"reply_to_message_id":  "1",
+			}, args)
+
+			files := extractFiles(r)
+
+			assert.Equal(t, map[string]InputFile{
+				"photo": inputFile,
+			}, files)
+		}
+	})
+}

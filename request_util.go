@@ -22,3 +22,8 @@ func addOptReplyMarkupToRequest(r *Request, k string, rm ReplyMarkup) (*Request,
 
 	return r, nil
 }
+
+func addMediaToRequest(r *Request, k string, media Media) *Request {
+	media.AddFileToRequest(k, r)
+	return r
+}

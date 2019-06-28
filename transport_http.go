@@ -45,7 +45,7 @@ func (enc *MultipartEncoder) AddString(k string, v string) error {
 }
 
 // AddFile encodes file value.
-func (enc *MultipartEncoder) AddFile(k string, file RequestFile) error {
+func (enc *MultipartEncoder) AddFile(k string, file InputFile) error {
 	writer, err := enc.w.CreateFormFile(k, file.Name)
 	if err != nil {
 		return errors.Wrapf(err, "create form file '%s'", k)
@@ -101,7 +101,7 @@ func (w *URLEncodedEncoder) AddString(k string, v string) error {
 }
 
 // AddFile not supported by this encoder, returns error.
-func (w *URLEncodedEncoder) AddFile(k string, file RequestFile) error {
+func (w *URLEncodedEncoder) AddFile(k string, file InputFile) error {
 	return errors.New("URLEncodedEncoder does not support file uploading")
 }
 

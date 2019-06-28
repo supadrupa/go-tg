@@ -27,7 +27,7 @@ func TestMultipartEncoder(t *testing.T) {
 	write := func() {
 		encoder := NewMultipartEncoder(&body)
 
-		file := RequestFile{
+		file := InputFile{
 			Name: "test.txt",
 			Body: strings.NewReader("test, test, test"),
 		}
@@ -72,7 +72,7 @@ func TestURLEncodedEncoder(t *testing.T) {
 	write := func() {
 		encoder := NewURLEncodedEncoder(&body)
 
-		file := RequestFile{
+		file := InputFile{
 			Name: "test.txt",
 			Body: strings.NewReader("test, test, test"),
 		}
@@ -205,7 +205,7 @@ func TestHTTPTransport_Execute(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("Streaming", func(t *testing.T) {
-		file := RequestFile{
+		file := InputFile{
 			Name: "test.txt",
 			Body: strings.NewReader("test, test, test"),
 		}

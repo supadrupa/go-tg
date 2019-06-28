@@ -1,16 +1,9 @@
 package tg
 
 import (
-	"io"
 	"strconv"
 	"time"
 )
-
-// RequestFile represents file to be uploaded with request.
-type RequestFile struct {
-	Body io.Reader
-	Name string
-}
 
 // Encoder represents request encoder.
 type Encoder interface {
@@ -18,7 +11,7 @@ type Encoder interface {
 	AddString(k string, v string) error
 
 	// Write files argument k to encoder.
-	AddFile(k string, file RequestFile) error
+	AddFile(k string, file InputFile) error
 }
 
 // Request represents RPC request to Telegram Bot API.
@@ -33,7 +26,7 @@ type Request struct {
 	method string
 
 	args  map[string]string
-	files map[string]RequestFile
+	files map[string]InputFile
 }
 
 // NewRequest creates request with provided method.
@@ -117,10 +110,10 @@ func (r *Request) AddFloat64(k string, v float64) *Request {
 }
 
 // AddInputFile adds InputFile to request.
-func (r *Request) AddFile(k string, file RequestFile) *Request {
+func (r *Request) AddFile(k string, file InputFile) *Request {
 	// make files map if not exist
 	if r.files == nil {
-		r.files = make(map[string]RequestFile)
+		r.files = make(map[string]InputFile)
 	}
 
 	r.files[k] = file

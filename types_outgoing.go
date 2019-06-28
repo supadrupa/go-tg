@@ -1,5 +1,15 @@
 package tg
 
+// Media define interface files in outgoing message.
+//
+// Types implementing this interface:
+//  - InputFile
+//  - FileID
+//  - RemoteFile
+type Media interface {
+	AddFileToRequest(k string, r *Request)
+}
+
 // TextMessage represents simple text message.
 //
 // Related API method: https://core.telegram.org/bots/api#sendmessage
@@ -129,4 +139,78 @@ func (msg *ForwardMessage) BuildSendRequest() (*Request, error) {
 	addOptMessageIdentityToRequest(r, "message_id", srcMessage)
 
 	return r, nil
+}
+
+type PhotoMessage struct {
+	// Recipient of photo message
+	Peer Peer
+
+	// Photo (InputFile, FileID, RemoteFile)
+	Photo Media
+
+	// Caption of photo (0-1024)
+	Caption string
+
+	// Parse mode of caption
+	ParseMode ParseMode
+
+	// Pass true for send message silent.
+	DisableNotification bool
+
+	// Reply to message identity.
+	ReplyTo MessageIdentity
+
+	// Reply markup of the message.
+	ReplyMarkup ReplyMarkup
+}
+
+// NewPhotoMessage creates a photo message.
+func NewPhotoMessage(to Peer, media Media) *PhotoMessage {
+	return &PhotoMessage{
+		Peer:  to,
+		Photo: media,
+	}
+}
+
+// WithCaption sets message caption.
+func (msg *PhotoMessage) WithCaption(text string) *PhotoMessage {
+	msg.Caption = text
+	return msg
+}
+
+// WithParseMode sets caption parse mode.
+func (msg *PhotoMessage) WithParseMode(pm ParseMode) *PhotoMessage {
+	msg.ParseMode = pm
+	return msg
+}
+
+// WithNotification enable or disable notification (default: enabled).
+func (msg *PhotoMessage) WithNotification(yes bool) *PhotoMessage {
+	msg.DisableNotification = !yes
+	return msg
+}
+
+// WithReplyTo sets ids of original message, if message is reply.
+func (msg *PhotoMessage) WithReplyTo(msgID MessageIdentity) *PhotoMessage {
+	msg.ReplyTo = msgID
+	return msg
+}
+
+// WithReplyMarkup sets message reply markup.
+func (msg *PhotoMessage) WithReplyMarkup(rm ReplyMarkup) *PhotoMessage {
+	msg.ReplyMarkup = rm
+	return msg
+}
+
+func (msg *PhotoMessage) BuildSendRequest() (*Request, error) {
+	r := NewRequest("sendPhoto").
+		AddChatID(msg.Peer).
+		AddOptString("caption", msg.Caption).
+		AddOptString("parse_mode", msg.ParseMode.String()).
+		AddOptBool("disable_notification", msg.DisableNotification)
+
+	addMediaToRequest(r, "photo", msg.Photo)
+	addOptMessageIdentityToRequest(r, "reply_to_message_id", msg.ReplyTo)
+
+	return addOptReplyMarkupToRequest(r, "reply_markup", msg.ReplyMarkup)
 }

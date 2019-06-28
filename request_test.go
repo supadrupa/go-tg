@@ -12,7 +12,7 @@ import (
 
 type mapEncoder struct {
 	Args  map[string]string
-	Files map[string]RequestFile
+	Files map[string]InputFile
 }
 
 var _ Encoder = &mapEncoder{}
@@ -20,7 +20,7 @@ var _ Encoder = &mapEncoder{}
 func newMapEncoder() *mapEncoder {
 	return &mapEncoder{
 		Args:  make(map[string]string),
-		Files: make(map[string]RequestFile),
+		Files: make(map[string]InputFile),
 	}
 }
 
@@ -29,7 +29,7 @@ func (enc *mapEncoder) AddString(k, v string) error {
 	return nil
 }
 
-func (enc *mapEncoder) AddFile(k string, v RequestFile) error {
+func (enc *mapEncoder) AddFile(k string, v InputFile) error {
 	enc.Files[k] = v
 	return nil
 }
@@ -42,7 +42,7 @@ func extractArgs(r *Request) map[string]string {
 	return enc.Args
 }
 
-func extractFiles(r *Request) map[string]RequestFile {
+func extractFiles(r *Request) map[string]InputFile {
 	enc := newMapEncoder()
 	if err := r.Encode(enc); err != nil {
 		panic(err)
@@ -76,11 +76,11 @@ func assertRequestArgEqual(
 	)
 }
 
-func assertRequestFileEqual(
+func assertInputFileEqual(
 	t *testing.T,
 	r *Request,
 	key string,
-	excepted RequestFile,
+	excepted InputFile,
 ) bool {
 	args := extractFiles(r)
 	v := args[key]
@@ -215,12 +215,12 @@ func TestRequest_Add(t *testing.T) {
 	})
 
 	t.Run("File", func(t *testing.T) {
-		file := RequestFile{
+		file := InputFile{
 			Body: &bytes.Buffer{},
 			Name: "test.png",
 		}
 
-		assertRequestFileEqual(t,
+		assertInputFileEqual(t,
 			NewRequest("test").AddFile("v", file),
 			"v",
 			file,
@@ -298,7 +298,7 @@ func TestRequest_HasFiles(t *testing.T) {
 		assert.False(t, r.HasFiles())
 	})
 	t.Run("WithFiles", func(t *testing.T) {
-		r := NewRequest("test").AddFile("mkk", RequestFile{
+		r := NewRequest("test").AddFile("mkk", InputFile{
 			Name: "Test.png",
 			Body: &bytes.Buffer{},
 		})
@@ -311,17 +311,17 @@ type encoderMock struct {
 	args           map[string]string
 	addStringError error
 
-	files        map[string]RequestFile
+	files        map[string]InputFile
 	addFileError error
 }
 
-func (mock *encoderMock) AddFile(k string, v RequestFile) error {
+func (mock *encoderMock) AddFile(k string, v InputFile) error {
 	if mock.addFileError != nil {
 		return mock.addFileError
 	}
 
 	if mock.files == nil {
-		mock.files = map[string]RequestFile{
+		mock.files = map[string]InputFile{
 			k: v,
 		}
 
@@ -357,7 +357,7 @@ func TestRequest_Encode(t *testing.T) {
 
 		req := NewRequest("test").
 			AddString("test", "v").
-			AddFile("f", RequestFile{Name: "test.png"})
+			AddFile("f", InputFile{Name: "test.png"})
 
 		err := req.Encode(enc)
 
@@ -371,7 +371,7 @@ func TestRequest_Encode(t *testing.T) {
 
 		req := NewRequest("test").
 			AddString("test", "v").
-			AddFile("f", RequestFile{Name: "test.png"})
+			AddFile("f", InputFile{Name: "test.png"})
 
 		err := req.Encode(enc)
 
@@ -385,7 +385,7 @@ func TestRequest_Encode(t *testing.T) {
 
 		req := NewRequest("test").
 			AddString("test", "v").
-			AddFile("f", RequestFile{Name: "test.png"})
+			AddFile("f", InputFile{Name: "test.png"})
 
 		err := req.Encode(enc)
 

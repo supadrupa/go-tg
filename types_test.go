@@ -22,6 +22,20 @@ func TestParseMode_String(t *testing.T) {
 	}
 }
 
+func TestFileID_AddFileToRequest(t *testing.T) {
+	r := NewRequest("test")
+
+	id := FileID("xxx")
+
+	id.AddFileToRequest("test", r)
+
+	assertRequestArgEqual(t,
+		r,
+		"test",
+		"xxx",
+	)
+}
+
 func TestPeers(t *testing.T) {
 	for _, tt := range []struct {
 		Peer  Peer

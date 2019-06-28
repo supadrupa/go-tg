@@ -2,7 +2,6 @@ package tg
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,7 +64,7 @@ func TestReplyMarkup(t *testing.T) {
 		},
 	} {
 		result, err := tt.Input.EncodeReplyMarkup()
-		fmt.Println(result)
+
 		if assert.NoError(t, err) {
 			assert.JSONEq(t, tt.Output, result)
 		}
