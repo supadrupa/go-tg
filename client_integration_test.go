@@ -202,6 +202,19 @@ func TestClient_Send_TextMessage_Integration(t *testing.T) {
 			),
 		)
 
-	err := integrationClient.Send(context.Background(), msg, nil)
-	assert.NoError(t, err)
+	sended := Message{}
+	ctx := context.Background()
+
+	err := integrationClient.Send(ctx, msg, &sended)
+	require.NoError(t, err)
+	require.NotZero(t, sended.ID)
+
+	t.Run("ForwardMessage", func(t *testing.T) {
+		err := integrationClient.Send(ctx, NewForwardMessage(
+			config.ExampleUserID,
+			sended,
+		), nil)
+
+		assert.NoError(t, err)
+	})
 }

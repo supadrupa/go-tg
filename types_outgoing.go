@@ -1,6 +1,8 @@
 package tg
 
 // TextMessage represents simple text message.
+//
+// Related API method: https://core.telegram.org/bots/api#sendmessage
 type TextMessage struct {
 	// Recipient of the message
 	Peer Peer
@@ -25,9 +27,9 @@ type TextMessage struct {
 }
 
 // NewTextMessage creates a simple text message for specified peer and provided text.
-func NewTextMessage(peer Peer, text string) *TextMessage {
+func NewTextMessage(to Peer, text string) *TextMessage {
 	return &TextMessage{
-		Peer: peer,
+		Peer: to,
 		Text: text,
 	}
 }
@@ -74,4 +76,57 @@ func (msg *TextMessage) BuildSendRequest() (*Request, error) {
 	addOptMessageIdentityToRequest(r, "reply_to_message_id", msg.ReplyTo)
 
 	return addOptReplyMarkupToRequest(r, "reply_markup", msg.ReplyMarkup)
+}
+
+// ForwardMessage represents send forward message.
+//
+// Example #1: forward recivied message:
+//   client.Send(ctx, tg.NewForwardMessage(
+//       userID,
+//       update.Message,
+//   ), nil)
+//
+// Example #2: forward message by known ids
+//   client.Send(ctx, tg.NewForwardMessage(recipient, tg.MessageLocation{
+//       Peer: ChatID(12345),
+//       Message: MessageID(12345),
+//   }, nil)
+//
+// Related API Method: https://core.telegram.org/bots/api#forwardmessage
+type ForwardMessage struct {
+	// Recipient of forwarded messages.
+	Peer Peer
+
+	// Message to forward.
+	Message MessageIdentityFull
+
+	// Set true, if message should be forwarded silent.
+	DisableNotification bool
+}
+
+// NewForwardMessage creates a forward.
+func NewForwardMessage(to Peer, msg MessageIdentityFull) *ForwardMessage {
+	return &ForwardMessage{
+		Peer:    to,
+		Message: msg,
+	}
+}
+
+// WithNotification on or off notification (default: on).
+func (msg *ForwardMessage) WithNotification(yes bool) *ForwardMessage {
+	msg.DisableNotification = !yes
+	return msg
+}
+
+func (msg *ForwardMessage) BuildSendRequest() (*Request, error) {
+	srcPeer, srcMessage := msg.Message.GetMessageLocation()
+
+	r := NewRequest("forwardMessage").
+		AddChatID(msg.Peer).
+		AddPeer("from_chat_id", srcPeer).
+		AddOptBool("disable_notification", msg.DisableNotification)
+
+	addOptMessageIdentityToRequest(r, "message_id", srcMessage)
+
+	return r, nil
 }

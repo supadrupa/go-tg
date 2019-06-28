@@ -52,3 +52,42 @@ func TestTextMessage(t *testing.T) {
 		}
 	})
 }
+
+func TestForwardMessage(t *testing.T) {
+	t.Run("NewAndWith", func(t *testing.T) {
+		assert.Equal(t,
+			&ForwardMessage{
+				Peer: UserID(2),
+				Message: MessageLocation{
+					Chat:    ChatID(1),
+					Message: MessageID(1),
+				},
+				DisableNotification: true,
+			},
+			NewForwardMessage(UserID(2), MessageLocation{
+				Chat:    ChatID(1),
+				Message: MessageID(1),
+			}).WithNotification(false),
+		)
+	})
+
+	t.Run("BuildSendRequest", func(t *testing.T) {
+		msg := NewForwardMessage(UserID(2), MessageLocation{
+			Chat:    ChatID(1),
+			Message: MessageID(1),
+		}).WithNotification(false)
+
+		r, err := msg.BuildSendRequest()
+
+		if assert.NoError(t, err) {
+			args := extractArgs(r)
+
+			assert.Equal(t, map[string]string{
+				"chat_id":              "2",
+				"message_id":           "1",
+				"from_chat_id":         "1",
+				"disable_notification": "true",
+			}, args)
+		}
+	})
+}
