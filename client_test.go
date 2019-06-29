@@ -258,3 +258,56 @@ func TestClient_Send(t *testing.T) {
 		assert.Equal(t, testErr, err)
 	})
 }
+
+func TestClient_GetUpdates(t *testing.T) {
+	t.Run("FullOptions", func(t *testing.T) {
+		request, _ := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			_, err := client.GetUpdates(ctx, &UpdatesOptions{
+				Offset:  UpdateID(1234),
+				Limit:   50,
+				Timeout: time.Second * 60,
+				AllowedUpdates: []UpdateType{
+					UpdateMessage,
+				},
+			})
+			return err
+		}, ResponseResultTrue, nil)
+
+		args := extractArgs(request)
+
+		assert.Equal(t, map[string]string{
+			"limit":           "50",
+			"offset":          "1234",
+			"timeout":         "60",
+			"allowed_updates": `["message"]`,
+		}, args)
+	})
+
+	t.Run("NoOptions", func(t *testing.T) {
+		request, _ := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			_, err := client.GetUpdates(ctx, nil)
+			return err
+		}, ResponseResultTrue, nil)
+
+		args := extractArgs(request)
+
+		assert.Equal(t, map[string]string{}, args)
+	})
+
+	t.Run("InvalidAllowedUpdates", func(t *testing.T) {
+		_, err := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			_, err := client.GetUpdates(ctx, &UpdatesOptions{
+				Offset:  UpdateID(1234),
+				Limit:   50,
+				Timeout: time.Second * 60,
+				AllowedUpdates: []UpdateType{
+					UpdateMessage,
+					UpdateType(0),
+				},
+			})
+			return err
+		}, ResponseResultTrue, nil)
+
+		assert.Error(t, err)
+	})
+}

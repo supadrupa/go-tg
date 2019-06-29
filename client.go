@@ -2,6 +2,7 @@ package tg
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"time"
 
@@ -371,4 +372,65 @@ func (client *Client) Send(ctx context.Context, msg OutgoingMessage, dst interfa
 		req,
 		&dst,
 	)
+}
+
+type UpdatesOptions struct {
+	// Identifier of the first update to be returned.
+	// Must be greater by one than the highest among the identifiers of previously received updates.
+	// By default, updates starting with the earliest unconfirmed update are returned.
+	// An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id.
+	// The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue.
+	// All previous updates will forgotten.
+	Offset UpdateID
+
+	// Limits the number of updates to be retrieved.
+	// Values between 1—100 are accepted.
+	// Defaults to 100.
+	Limit int
+
+	// Timeout for long polling.
+	// Defaults to 0, i.e. usual short polling.
+	// Should be positive, short polling should be used for testing purposes only.
+	Timeout time.Duration
+
+	// List the types of updates you want your bot to receive.
+	// Specify an empty list to receive all updates regardless of type (default).
+	// If not specified, the previous setting will be used.
+	AllowedUpdates []UpdateType
+}
+
+func (opts *UpdatesOptions) addToRequestAllowedUpdates(r *Request) error {
+	if opts.AllowedUpdates != nil {
+		val, err := json.Marshal(opts.AllowedUpdates)
+		if err != nil {
+			return errors.Wrap(err, "marshal allowed_updates")
+		}
+		r.AddString("allowed_updates", string(val))
+	}
+	return nil
+}
+
+func (opts *UpdatesOptions) addToRequest(r *Request) error {
+	if opts != nil {
+		r.AddOptInt("offset", int(opts.Offset)).
+			AddOptInt("limit", int(opts.Limit)).
+			AddOptInt("timeout", int(opts.Timeout.Seconds()))
+
+		return opts.addToRequestAllowedUpdates(r)
+	}
+
+	return nil
+}
+
+// GetUpdates returns incoming updates using long polling.
+func (client *Client) GetUpdates(ctx context.Context, opts *UpdatesOptions) (updates UpdateSlice, err error) {
+	r := NewRequest("getUpdates")
+
+	if err := opts.addToRequest(r); err != nil {
+		return nil, err
+	}
+
+	err = client.Invoke(ctx, r, &updates)
+
+	return
 }
