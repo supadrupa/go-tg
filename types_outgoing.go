@@ -92,7 +92,7 @@ func (msg *TextMessage) BuildSendRequest() (*Request, error) {
 
 // ForwardMessage represents send forward message.
 //
-// Example #1: forward recivied message:
+// Example #1: forward received message:
 //   client.Send(ctx, tg.NewForwardMessage(
 //       userID,
 //       update.Message,

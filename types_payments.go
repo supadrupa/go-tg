@@ -85,7 +85,7 @@ type Invoice struct {
 	TotalAmount int `json:"total_amount"`
 }
 
-// ShippingQueryID unique shipping query identifer.
+// ShippingQueryID unique shipping query identifier.
 type ShippingQueryID string
 
 // ShippingQuery object contains information about an incoming shipping query.
