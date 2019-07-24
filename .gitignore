@@ -13,3 +13,5 @@
 .env.test
 .vscode/
 .idea/
+coverage.txt
+.env*
