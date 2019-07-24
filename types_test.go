@@ -2,8 +2,11 @@ package tg
 
 import (
 	"context"
+	"encoding/json"
 	"io"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -151,4 +154,93 @@ func TestFile_NewReader(t *testing.T) {
 	assert.Nil(t, body)
 	assert.EqualError(t, err, "test error")
 	assert.Equal(t, file.Path, path)
+}
+
+func TestWebhookError_Error(t *testing.T) {
+
+	err := WebhookError{"invalid response", time.Now()}
+
+	assert.Regexp(t,
+		regexp.MustCompile(`invalid response at (.+) \((.+)\)`),
+		err.Error(),
+	)
+}
+
+func TestWebhookInfo_IsSet(t *testing.T) {
+	wh := WebhookInfo{}
+	assert.False(t, wh.IsSet())
+
+	wh = WebhookInfo{URL: "https://google.com"}
+	assert.True(t, wh.IsSet())
+}
+
+func TestWebhookInfo_HasError(t *testing.T) {
+	wh := WebhookInfo{}
+	assert.False(t, wh.HasError())
+
+	wh = WebhookInfo{Error: &WebhookError{Message: "Test"}}
+	assert.True(t, wh.HasError())
+}
+
+func TestWebhookInfo_UnmarshalJSON(t *testing.T) {
+	t.Run("WithoutError", func(t *testing.T) {
+		webhookInfo := WebhookInfo{}
+
+		err := json.Unmarshal([]byte(`{  
+		   "url":"http://test.com",
+		   "has_custom_certificate":true,
+		   "pending_update_count":42,
+		   "max_connections":40
+		}`), &webhookInfo)
+
+		assert.Equal(t, WebhookInfo{
+			URL:                  "http://test.com",
+			HasCustomCertificate: true,
+			PendingUpdateCount:   42,
+			MaxConnections:       40,
+		}, webhookInfo)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("WithError", func(t *testing.T) {
+		webhookInfo := WebhookInfo{}
+
+		err := json.Unmarshal([]byte(`{  
+		   "url":"http://test.com",
+		   "has_custom_certificate":true,
+		   "pending_update_count":42,
+           "last_error_message": "trouble",
+           "last_error_date": 1563980388,
+		   "max_connections":40
+		}`), &webhookInfo)
+
+		assert.Equal(t, WebhookInfo{
+			URL:                  "http://test.com",
+			HasCustomCertificate: true,
+			PendingUpdateCount:   42,
+			MaxConnections:       40,
+			Error: &WebhookError{
+				Message: "trouble",
+				Date:    time.Unix(1563980388, 0),
+			},
+		}, webhookInfo)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("WithInvalidTypeError", func(t *testing.T) {
+		webhookInfo := WebhookInfo{}
+
+		err := json.Unmarshal([]byte(`{  
+		   "url":"http://test.com",
+		   "has_custom_certificate":true,
+		   "pending_update_count": "x",
+           "last_error_message": "trouble",
+           "last_error_date": 1563980388,
+		   "max_connections":40
+		}`), &webhookInfo)
+
+		assert.Error(t, err)
+	})
 }

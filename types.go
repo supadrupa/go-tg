@@ -3,7 +3,9 @@ package tg
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
+	"time"
 )
 
 // ParseMode represents formatting style
@@ -300,4 +302,88 @@ type CallbackQuery struct {
 
 	// Optional. Short name of a Game to be returned, serves as the unique identifier for the game
 	GameShortName string `json:"game_short_name,omitempty"`
+}
+
+// WebhookError represent error that happened when trying to delivery update via webhook.
+type WebhookError struct {
+	// Description of error
+	Message string
+
+	// Date of error
+	Date time.Time
+}
+
+func (err *WebhookError) Error() string {
+	return fmt.Sprintf("%s at %s (%s ago)",
+		err.Message,
+		err.Date.Format(time.RFC850),
+		time.Since(err.Date),
+	)
+}
+
+// WebhookInfo contains information about the current status of a webhook.
+type WebhookInfo struct {
+	// WebhookInfo URL, may be empty if webhook is not set up
+	URL string
+
+	// True, if a custom certificate was provided for webhook certificate checks
+	HasCustomCertificate bool
+
+	// Most recent error happened when trying to delivery update via webhook.
+	Error *WebhookError
+
+	// Number of updates awaiting delivery
+	PendingUpdateCount int
+
+	// Optional. Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
+	MaxConnections int
+
+	// Optional. A list of update types the bot is subscribed to. Defaults to all update types
+	AllowedUpdates []UpdateType
+}
+
+// IsSet returns true if webhook is set up.
+func (webhook WebhookInfo) IsSet() bool {
+	return webhook.URL != ""
+}
+
+// HasError returns true if webhook has information about last error.
+func (webhook WebhookInfo) HasError() bool {
+	return webhook.Error != nil
+}
+
+func (webhook *WebhookInfo) UnmarshalJSON(data []byte) error {
+	response := struct {
+		URL                  string       `json:"url"`
+		HasCustomCertificate bool         `json:"has_custom_certificate"`
+		LastErrorMessage     string       `json:"last_error_message"`
+		LastErrorDate        int64        `json:"last_error_date"`
+		PendingUpdateCount   int          `json:"pending_update_count"`
+		MaxConnections       int          `json:"max_connections"`
+		AllowedUpdates       []UpdateType `json:"allowed_updates"`
+	}{}
+
+	if err := json.Unmarshal(data, &response); err != nil {
+		return err
+	}
+
+	var lastError *WebhookError
+
+	if response.LastErrorMessage != "" {
+		lastError = &WebhookError{
+			Message: response.LastErrorMessage,
+			Date:    time.Unix(response.LastErrorDate, 0),
+		}
+	}
+
+	*webhook = WebhookInfo{
+		URL:                  response.URL,
+		HasCustomCertificate: response.HasCustomCertificate,
+		PendingUpdateCount:   response.PendingUpdateCount,
+		Error:                lastError,
+		MaxConnections:       response.MaxConnections,
+		AllowedUpdates:       response.AllowedUpdates,
+	}
+
+	return nil
 }

@@ -311,3 +311,61 @@ func TestClient_GetUpdates(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestClient_SetWebhook(t *testing.T) {
+	const url = "https://httpbin.org/status/200"
+
+	t.Run("UseOptions", func(t *testing.T) {
+		cert := NewInputFileBytes("private.cert", []byte("RSA..."))
+
+		request, err := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			return client.SetWebhook(ctx, url, &WebhookOptions{
+				Certificate:    &cert,
+				MaxConnections: 1,
+				AllowedUpdates: []UpdateType{UpdateMessage},
+			})
+		}, ResponseResultTrue, nil)
+
+		assert.NoError(t, err)
+
+		args := extractArgs(request)
+
+		assert.Equal(t, map[string]string{
+			"url":             url,
+			"max_connections": "1",
+			"allowed_updates": "[\"message\"]",
+		}, args)
+
+		files := extractFiles(request)
+
+		assert.Equal(t, map[string]InputFile{
+			"certificate": cert,
+		}, files)
+	})
+
+	t.Run("NoOptions", func(t *testing.T) {
+		request, err := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			return client.SetWebhook(ctx, url, nil)
+		}, ResponseResultTrue, nil)
+
+		assert.NoError(t, err)
+
+		args := extractArgs(request)
+
+		assert.Equal(t, map[string]string{
+			"url": url,
+		}, args)
+
+	})
+
+	t.Run("InvalidUpdateType", func(t *testing.T) {
+		_, err := FakeExecuteRequest(func(ctx context.Context, client *Client) error {
+			return client.SetWebhook(ctx, url, &WebhookOptions{
+				AllowedUpdates: []UpdateType{UpdateType(127)},
+			})
+		}, ResponseResultTrue, nil)
+
+		assert.Error(t, err)
+	})
+
+}

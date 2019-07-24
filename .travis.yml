@@ -1,15 +1,41 @@
+
+# use the latest ubuntu environment (18.04) available on travis
+dist: xenial
+
 language: go
+
+# force-enable Go modules.
+env:
+  - GO111MODULE=on
 
 go:
   - 1.12.x
 
-sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 
 
+# Only clone the most recent commit.
 git:
   depth: 1
 
-
 script:
-  - go test -v -race -coverprofile=coverage.txt -covermode=atomic -tags=integration
+  # if this is pull request build run unit and integrations
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then go test -v -race -coverprofile=coverage.txt -covermode=atomic -tags integration; fi
+
+  # if this is not pull request build run unit tests only
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then  go test -v -race -coverprofile=coverage.txt -covermode=atomic; fi
+
+  # upload coverage report to CodeCov
   - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
+
+  webhooks:
+    urls:
+      - https://www.travisbuddy.com/
+    on_success: never

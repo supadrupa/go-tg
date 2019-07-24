@@ -434,3 +434,85 @@ func (client *Client) GetUpdates(ctx context.Context, opts *UpdatesOptions) (upd
 
 	return
 }
+
+// WebhookOptions contains optional params for Client.SetWebhook.
+type WebhookOptions struct {
+	// Optional. Upload your public key certificate so that the root certificate in use can be checked.
+	Certificate *InputFile
+
+	// Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100.
+	// Defaults to 40.
+	// Use lower values to limit the load on your bot‘s server, and higher values to increase your bot’s throughput.
+	MaxConnections int
+
+	// List the types of updates you want your bot to receive.
+	// Specify an empty list to receive all updates regardless of type (default).
+	// If not specified, the previous setting will be used.
+	AllowedUpdates []UpdateType
+}
+
+func (opts *WebhookOptions) addToRequestAllowedUpdates(r *Request) error {
+	if opts.AllowedUpdates != nil {
+		val, err := json.Marshal(opts.AllowedUpdates)
+		if err != nil {
+			return errors.Wrap(err, "marshal allowed_updates")
+		}
+		r.AddString("allowed_updates", string(val))
+	}
+	return nil
+}
+
+func (opts *WebhookOptions) addToRequest(r *Request) error {
+	if opts != nil {
+		if opts.Certificate != nil {
+			r.AddFile("certificate", *opts.Certificate)
+		}
+
+		r.AddOptInt("max_connections", opts.MaxConnections)
+
+		return opts.addToRequestAllowedUpdates(r)
+	}
+
+	return nil
+}
+
+// SetWebhook use this method to specify a url and receive incoming updates via an outgoing webhook.
+// Whenever there is an update for the bot, we will send an HTTPS POST request to the specified url, containing a JSON-serialized Update.
+// In case of an unsuccessful request, we will give up after a reasonable amount of attempts. Returns True on success.
+func (client *Client) SetWebhook(ctx context.Context, url string, opts *WebhookOptions) error {
+	r := NewRequest("setWebhook")
+
+	r.AddString("url", url)
+
+	if err := opts.addToRequest(r); err != nil {
+		return err
+	}
+
+	return client.Invoke(ctx, r, nil)
+}
+
+// GetWebhookInfo returns current webhook status.
+//
+// Source: https://core.telegram.org/bots/api#getwebhookinfo
+func (client *Client) GetWebhookInfo(
+	ctx context.Context,
+) (info *WebhookInfo, err error) {
+	// TODO: maybe define requests without argument globally and use it instead create new?
+
+	err = client.Invoke(ctx,
+		NewRequest("getWebhookInfo"),
+		&info,
+	)
+
+	return
+}
+
+// DeleteWebhook remove webhook.
+//
+// Source: https://core.telegram.org/bots/api#deletewebhook
+func (client *Client) DeleteWebhook(ctx context.Context) error {
+	return client.Invoke(ctx,
+		NewRequest("deleteWebhook"),
+		nil,
+	)
+}

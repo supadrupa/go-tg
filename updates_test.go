@@ -51,7 +51,7 @@ func TestUpdate_Type(t *testing.T) {
 	}
 }
 
-func TestUpdate_String(t *testing.T) {
+func TestUpdateType_String(t *testing.T) {
 	for _, tt := range []struct {
 		Type       UpdateType
 		Excepted   string
@@ -85,5 +85,36 @@ func TestUpdate_String(t *testing.T) {
 			)
 		}
 
+	}
+}
+
+func TestUpdateType_UnmarshalText(t *testing.T) {
+	for _, tt := range []struct {
+		Excepted     UpdateType
+		Input        string
+		UnmarshalErr bool
+	}{
+		{UpdateMessage, "message", false},
+		{UpdateEditedMessage, "edited_message", false},
+		{UpdateChannelPost, "channel_post", false},
+		{UpdateEditedChannelPost, "edited_channel_post", false},
+		{UpdateInlineQuery, "inline_query", false},
+		{UpdateChosenInlineResult, "chosen_inline_result", false},
+		{UpdateCallbackQuery, "callback_query", false},
+		{UpdateShippingQuery, "shipping_query", false},
+		{UpdatePreCheckoutQuery, "pre_checkout_query", false},
+		{UpdatePoll, "poll", false},
+		{UpdateType(0), "", true},
+	} {
+		var updateType UpdateType
+
+		if tt.UnmarshalErr {
+			assert.Error(t, updateType.UnmarshalText([]byte(tt.Input)))
+		} else {
+			err := updateType.UnmarshalText([]byte(tt.Input))
+			if assert.NoError(t, err) {
+				assert.Equal(t, tt.Excepted, updateType)
+			}
+		}
 	}
 }

@@ -131,3 +131,41 @@ func (ut UpdateType) MarshalText() ([]byte, error) {
 
 	return []byte(val), nil
 }
+
+func parseUpdateType(ut string) (UpdateType, error) {
+	switch ut {
+	case "message":
+		return UpdateMessage, nil
+	case "edited_message":
+		return UpdateEditedMessage, nil
+	case "channel_post":
+		return UpdateChannelPost, nil
+	case "edited_channel_post":
+		return UpdateEditedChannelPost, nil
+	case "inline_query":
+		return UpdateInlineQuery, nil
+	case "chosen_inline_result":
+		return UpdateChosenInlineResult, nil
+	case "callback_query":
+		return UpdateCallbackQuery, nil
+	case "shipping_query":
+		return UpdateShippingQuery, nil
+	case "pre_checkout_query":
+		return UpdatePreCheckoutQuery, nil
+	case "poll":
+		return UpdatePoll, nil
+	default:
+		return UpdateType(0), errUpdateTypeUnknown
+	}
+}
+
+func (ut *UpdateType) UnmarshalText(data []byte) error {
+	updateType, err := parseUpdateType(string(data))
+	if err != nil {
+		return err
+	}
+
+	*ut = updateType
+
+	return nil
+}

@@ -287,3 +287,51 @@ func TestClient_Send_AudioMessage_Integration(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+func TestClient_Webhook_Integration(t *testing.T) {
+	const (
+		url            = "https://httpbin.org/status/200"
+		maxConnections = 1
+	)
+
+	allowedUpdates := []UpdateType{UpdateEditedMessage}
+
+	ctx := context.Background()
+
+	t.Run("Install", func(t *testing.T) {
+		err := integrationClient.SetWebhook(ctx, url, &WebhookOptions{
+			MaxConnections: maxConnections,
+			AllowedUpdates: allowedUpdates,
+		})
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("Retrieve", func(t *testing.T) {
+		info, err := integrationClient.GetWebhookInfo(ctx)
+
+		if assert.NoError(t, err) && assert.NotNil(t, info) {
+			assert.Equal(t, url, info.URL)
+			assert.Equal(t, maxConnections, info.MaxConnections)
+			assert.Equal(t, allowedUpdates, info.AllowedUpdates)
+		}
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		err := integrationClient.DeleteWebhook(ctx)
+		assert.NoError(t, err)
+	})
+
+	t.Run("RetrieveAfterDelete", func(t *testing.T) {
+		info, err := integrationClient.GetWebhookInfo(ctx)
+
+		if assert.NoError(t, err) && assert.NotNil(t, info) {
+			assert.Empty(t, info.URL)
+		}
+	})
+
+	info, err := integrationClient.GetWebhookInfo(context.Background())
+
+	assert.NoError(t, err)
+	assert.NotNil(t, info)
+}
