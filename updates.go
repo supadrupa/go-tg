@@ -8,6 +8,10 @@ import "github.com/pkg/errors"
 // then identifier of the next update will be chosen randomly instead of sequentially.
 type UpdateID int
 
+func (id UpdateID) Next() UpdateID {
+	return id + 1
+}
+
 // This object represents an incoming update.
 // At most one of the optional parameters can be present in any given update.
 type Update struct {
@@ -92,6 +96,20 @@ const (
 	UpdatePoll
 )
 
+// UpdateTypes list of all possible values of UpdateType.
+var UpdateTypes = []UpdateType{
+	UpdateMessage,
+	UpdateEditedMessage,
+	UpdateChannelPost,
+	UpdateEditedChannelPost,
+	UpdateInlineQuery,
+	UpdateChosenInlineResult,
+	UpdateCallbackQuery,
+	UpdateShippingQuery,
+	UpdatePreCheckoutQuery,
+	UpdatePoll,
+}
+
 // String returns name of update type.
 func (ut UpdateType) String() string {
 	switch ut {
@@ -132,8 +150,20 @@ func (ut UpdateType) MarshalText() ([]byte, error) {
 	return []byte(val), nil
 }
 
-func parseUpdateType(ut string) (UpdateType, error) {
-	switch ut {
+func (ut *UpdateType) UnmarshalText(data []byte) error {
+	updateType, err := ParseUpdateType(string(data))
+	if err != nil {
+		return err
+	}
+
+	*ut = updateType
+
+	return nil
+}
+
+// ParseUpdateType from string
+func ParseUpdateType(v string) (UpdateType, error) {
+	switch v {
 	case "message":
 		return UpdateMessage, nil
 	case "edited_message":
@@ -157,15 +187,4 @@ func parseUpdateType(ut string) (UpdateType, error) {
 	default:
 		return UpdateType(0), errUpdateTypeUnknown
 	}
-}
-
-func (ut *UpdateType) UnmarshalText(data []byte) error {
-	updateType, err := parseUpdateType(string(data))
-	if err != nil {
-		return err
-	}
-
-	*ut = updateType
-
-	return nil
 }

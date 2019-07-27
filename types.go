@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -36,6 +38,20 @@ func (pm ParseMode) String() string {
 // Peer define generic interface
 type Peer interface {
 	AddPeerToRequest(k string, r *Request)
+}
+
+func ParsePeer(v string) (Peer, error) {
+	if strings.HasPrefix(v, "@") {
+		return Username(v[1:]), nil
+	} else {
+		// NOTE: maybe check prefix (e.g. -100 is channels) and return and a more specific type?
+
+		id, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return ChatID(id), nil
+	}
 }
 
 // UserID represents unique user identifier.

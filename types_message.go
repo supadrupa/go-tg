@@ -41,7 +41,7 @@ type Message struct {
 	ID MessageID `json:"message_id"`
 
 	// Optional. Sender, empty for messages sent to channels
-	Sender *User `json:"sender"`
+	From *User `json:"from"`
 
 	// Date the message was sent in Unix time
 	Date int64 `json:"date"`

@@ -6,6 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUpdateID_Next(t *testing.T) {
+	id := UpdateID(0)
+
+	assert.Equal(t, UpdateID(1), id.Next())
+}
+
 func TestUpdate_Type(t *testing.T) {
 	for _, tt := range []struct {
 		Input  Update

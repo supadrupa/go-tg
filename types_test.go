@@ -25,6 +25,28 @@ func TestParseMode_String(t *testing.T) {
 	}
 }
 
+func TestParsePeer(t *testing.T) {
+	for _, tt := range []struct {
+		Input  string
+		Result Peer
+		Error  bool
+	}{
+		{"@channely_updates", Username("channely_updates"), false},
+		{"-1001072262979", ChatID(-1001072262979), false},
+		{"bad", nil, true},
+	} {
+		if tt.Error {
+			_, err := ParsePeer(tt.Input)
+			assert.Error(t, err)
+		} else {
+			v, err := ParsePeer(tt.Input)
+			if assert.NoError(t, err) {
+				assert.Equal(t, tt.Result, v)
+			}
+		}
+	}
+}
+
 func TestFileID_AddFileToRequest(t *testing.T) {
 	r := NewRequest("test")
 
@@ -186,7 +208,7 @@ func TestWebhookInfo_UnmarshalJSON(t *testing.T) {
 	t.Run("WithoutError", func(t *testing.T) {
 		webhookInfo := WebhookInfo{}
 
-		err := json.Unmarshal([]byte(`{  
+		err := json.Unmarshal([]byte(`{
 		   "url":"http://test.com",
 		   "has_custom_certificate":true,
 		   "pending_update_count":42,
@@ -206,7 +228,7 @@ func TestWebhookInfo_UnmarshalJSON(t *testing.T) {
 	t.Run("WithError", func(t *testing.T) {
 		webhookInfo := WebhookInfo{}
 
-		err := json.Unmarshal([]byte(`{  
+		err := json.Unmarshal([]byte(`{
 		   "url":"http://test.com",
 		   "has_custom_certificate":true,
 		   "pending_update_count":42,
@@ -232,7 +254,7 @@ func TestWebhookInfo_UnmarshalJSON(t *testing.T) {
 	t.Run("WithInvalidTypeError", func(t *testing.T) {
 		webhookInfo := WebhookInfo{}
 
-		err := json.Unmarshal([]byte(`{  
+		err := json.Unmarshal([]byte(`{
 		   "url":"http://test.com",
 		   "has_custom_certificate":true,
 		   "pending_update_count": "x",
